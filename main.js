@@ -48,7 +48,7 @@ Game.prototype.draw = function(){
     this.clear();
  
     // ** Add stuff you want drawn in the background all the time here **
-    this.tower.draw(this.ctx);
+    this.tower.draw(this.ctx, this.mouse);
  
     // draw all shapes
     var l = shapes.length;
@@ -71,14 +71,33 @@ function Tower(x, y, w, h, fill) {
   this.h = h || 1;
   this.fill = fill || '#AAAAAA';
 }
-Tower.prototype.draw = function(ctx){
+Tower.prototype.draw = function(ctx, mouse){
+    ctx.save();
+    
     ctx.fillStyle = this.fill;
     context.beginPath();
     context.arc( this.x, this.y, 10, 0, Math.PI * 2, true );
     context.closePath();
     context.fill();
+    if(typeof mouse !== "undefined"){
+           //Math.atan(2);
+           //tg = a/b
+           var a = mouse.x - this.x;
+           var b = mouse.y - this.y;
+           var tg = a/b;
+           var atan = Math.atan(tg);
+           ctx.translate(this.x, this.y);
+           ctx.rotate(-Math.PI*2);
+           ctx.rotate(-atan);
+           ctx.fillRect(0-this.w/2, 0-this.h, this.w, this.h);
+           
+    }
     //ctx.fillStyle = '#AA00AA';
-    ctx.fillRect(this.x - this.w /2, this.y - this.h, this.w, this.h);
+    //ctx.fillRect(this.x - this.w /2, this.y - this.h, this.w, this.h);
+    
+
+    
+    ctx.restore();
 }
 
 //from introduction to canvas http://simonsarris.com/blog/510-making-html5-canvas-useful
@@ -157,10 +176,8 @@ function init() {
         game.shapes.push( new Shape(mx, my, 10, 10, 'rgba(127, 255, 212, .5)') );
       }, true);
      canvas.addEventListener('mousemove', function(e) {
-        var mouse = game.getMouse(e);
-        var mx = mouse.x;
-        var my = mouse.y;
-        
+        game.mouse = game.getMouse(e);
+                
       }, true);
 
 }
@@ -177,6 +194,10 @@ function animate(dt) {
 ////TRASH
 
 ////
+
+function convertToRadians(degree) {
+    return degree*(Math.PI/180);
+}
 
 function draw(dt) {
 
