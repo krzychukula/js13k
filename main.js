@@ -35,8 +35,10 @@ function Game(canvas, ctx){
     this.ctx = ctx;
     this.width = canvas.width;
     this.height = canvas.height;
-    this.shapes = [];
+    this.mouse = {x: this.width/2, y: 0};
+    this.bullets = [];
     this.tower = new Tower(this.width/2, this.height, 10, 20, 'rgb(0,0,0)');
+    this.viewfinder = new Viewfinder(0, 0, 20, 20, 'rgb(0,0,0)');
 }
 Game.prototype.clear = function(){
     this.ctx.fillStyle = 'rgb(245,245,245)';
@@ -49,6 +51,7 @@ Game.prototype.draw = function(){
  
     // ** Add stuff you want drawn in the background all the time here **
     this.tower.draw(this.ctx, this.mouse);
+    this.viewfinder.draw(this.ctx, this.mouse);
  
     // draw all shapes
     var l = shapes.length;
@@ -71,6 +74,15 @@ function Tower(x, y, w, h, fill) {
   this.h = h || 1;
   this.fill = fill || '#AAAAAA';
 }
+Tower.prototype.getRotate = function(mouse){
+    //Math.atan(2);
+    //tg = a/b
+    var a = mouse.x - this.x;
+   var b = mouse.y - this.y;
+   var tg = a/b;
+   var atan = -Math.PI*2-Math.atan(tg);
+   return atan;
+}
 Tower.prototype.draw = function(ctx, mouse){
     ctx.save();
     
@@ -82,21 +94,15 @@ Tower.prototype.draw = function(ctx, mouse){
     if(typeof mouse !== "undefined"){
            //Math.atan(2);
            //tg = a/b
-           var a = mouse.x - this.x;
-           var b = mouse.y - this.y;
-           var tg = a/b;
-           var atan = Math.atan(tg);
+           var atan = this.getRotate(mouse);
            ctx.translate(this.x, this.y);
-           ctx.rotate(-Math.PI*2);
-           ctx.rotate(-atan);
+           ctx.rotate(atan);
            ctx.fillRect(0-this.w/2, 0-this.h, this.w, this.h);
            
     }
     //ctx.fillStyle = '#AA00AA';
     //ctx.fillRect(this.x - this.w /2, this.y - this.h, this.w, this.h);
-    
-
-    
+        
     ctx.restore();
 }
 
@@ -104,7 +110,28 @@ Tower.prototype.draw = function(ctx, mouse){
 
 // Constructor for Shape objects to hold data for all drawn objects.
 // For now they will just be defined as rectangles.
-function Shape(x, y, w, h, fill) {
+function Bullet(x, y, w, angle, fill) {
+  // This is a very simple and unsafe constructor. 
+  // All we're doing is checking if the values exist.
+  // "x || 0" just means "if there is a value for x, use that. Otherwise use 0."
+  this.x = x || 0;
+  this.y = y || 0;
+  this.w = w || 1;
+  this.angle = angle || 0;
+  this.fill = fill || '#AAAAAA';
+}
+ 
+// Draws this shape to a given context
+Bullet.prototype.draw = function(ctx) {
+  ctx.fillStyle = this.fill;
+    context.beginPath();
+    context.arc( this.x, this.y, this.w, 0, Math.PI * 2, true );
+    context.closePath();
+    context.fill();
+  //ctx.fillRect(this.x, this.y, this.w, this.h);
+};
+
+function Viewfinder(x, y, w, h, fill) {
   // This is a very simple and unsafe constructor. 
   // All we're doing is checking if the values exist.
   // "x || 0" just means "if there is a value for x, use that. Otherwise use 0."
@@ -116,12 +143,17 @@ function Shape(x, y, w, h, fill) {
 }
  
 // Draws this shape to a given context
-Shape.prototype.draw = function(ctx) {
-  ctx.fillStyle = this.fill;
-    context.beginPath();
-    context.arc( this.x, this.y, this.w, 0, Math.PI * 2, true );
-    context.closePath();
-    context.fill();
+Viewfinder.prototype.draw = function(ctx, mouse) {
+  
+    if(typeof mouse !== "undefined"){
+        ctx.strokeStyle = this.fill;
+        context.beginPath();
+        context.arc( mouse.x, mouse.y, this.w, 0, Math.PI * 2, true );
+        context.closePath();
+        context.stroke();
+    }
+    
+    
   //ctx.fillRect(this.x, this.y, this.w, this.h);
 };
 
@@ -173,7 +205,7 @@ function init() {
         var mx = mouse.x;
         var my = mouse.y;
         //todo
-        game.shapes.push( new Shape(mx, my, 10, 10, 'rgba(127, 255, 212, .5)') );
+        game.shapes.push( new Bullet(mx, my, 10, 10, 'rgba(127, 255, 212, .5)') );
       }, true);
      canvas.addEventListener('mousemove', function(e) {
         game.mouse = game.getMouse(e);
