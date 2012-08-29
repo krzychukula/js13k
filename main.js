@@ -40,13 +40,24 @@ function Game(canvas, ctx){
     this.bullets = [];
     this.tower = new Tower(this.width/2, this.height, 10, 20, 'rgb(0,0,0)');
     this.viewfinder = new Viewfinder(0, 0, 20, 20, 'rgb(0,0,0)');
+    this.toClean = 0;
 }
 Game.prototype.clear = function(){
     this.ctx.fillStyle = 'rgb(245,245,245)';
     this.ctx.fillRect( 0, 0, 255, 255 );
 }
 
+
+
 Game.prototype.draw = function(){
+    if(this.addBullet){
+        var mouse = this.mouse;
+
+        //todo
+        var atan = game.tower.getRotate(mouse);           
+        game.bullets.push( new Bullet(game.tower.x, game.tower.y, 5, atan, 'rgba(125, 50, 50, 1)') );
+        this.addBullet = false;
+    }
     var shapes = this.bullets;
     this.clear();
  
@@ -58,11 +69,24 @@ Game.prototype.draw = function(){
     var l = ( shapes && shapes.length) ? shapes.length : 0;
     for (var i = 0; i < l; i++) {
       var shape = shapes[i];
-      if(!shape) continue;
+      
       // We can skip the drawing of elements that have moved off the screen:
-      if (shape.x > this.width || shape.y > this.height ||
-          shape.x + shape.w < 0 || shape.y + shape.h < 0) continue;
-      shapes[i].draw(this.ctx);
+      if (!shape || shape.x > this.width || shape.y > this.height ||
+          shape.x + shape.w < 0 || shape.y + shape.h < 0 || shape.offset > this.height){
+              
+              shapes[i] = false;
+              this.toClean++;
+              
+        }else{
+            shapes[i].draw(this.ctx);
+        }
+    }
+    
+    if(this.toClean > 2){
+        console.log('clean', l);
+        this.bullets = shapes.filter(function(e){return e});
+        console.log('cleaned: ', this.bullets.length);
+        this.toClean = 0;
     }
 }
 function Tower(x, y, w, h, fill) {
@@ -118,17 +142,34 @@ function Bullet(x, y, w, angle, fill) {
   this.x = x || 0;
   this.y = y || 0;
   this.w = w || 1;
-  this.angle = angle || 0;
+  this.angle = Math.PI  + (angle || 0);
   this.fill = fill || '#AAAAAA';
+  
+  this.offset = 0;
 }
  
 // Draws this shape to a given context
 Bullet.prototype.draw = function(ctx) {
-  ctx.fillStyle = this.fill;
-    context.beginPath();
-    context.arc( this.x, this.y, this.w, 0, Math.PI * 2, true );
+    ctx.save();
+    
+    
+    context.beginPath();    
+    
+    ctx.translate(game.tower.x, game.tower.y);
+    ctx.rotate(this.angle); 
+    //ctx.fillStyle = 'rgba(0,245,245, 0.1 )';
+    //context.fillRect(0, 0, 200, 200);
+          
+    ctx.fillStyle = this.fill;
+    context.arc( 0, 30+this.offset, this.w, 0, Math.PI * 2, true );
     context.closePath();
     context.fill();
+    
+    this.offset += 1;
+    
+    
+    ctx.restore();
+
   //ctx.fillRect(this.x, this.y, this.w, this.h);
 };
 
@@ -173,9 +214,13 @@ Game.prototype.getMouse = function(e) {
   // Also add the <html> offsets in case there's a position:fixed bar
   //offsetX += this.stylePaddingLeft + this.styleBorderLeft + this.htmlLeft;
   //offsetY += this.stylePaddingTop + this.styleBorderTop + this.htmlTop;
- 
-  mx = e.pageX - offsetX;
-  my = e.pageY - offsetY;
+ if( e.targetTouches && e.targetTouches[0] ){
+     mx = e.targetTouches[0].pageX - offsetX;
+     my = e.targetTouches[0].pageY - offsetY;
+ }else{
+      mx = e.pageX - offsetX;
+      my = e.pageY - offsetY;
+ }
  
   // We return a simple javascript object (a hash) with x and y defined
   return {x: mx, y: my};
@@ -202,13 +247,17 @@ function init() {
     document.body.appendChild( canvas );
     //listeners
     canvas.addEventListener('click', function(e) {
-        var mouse = game.getMouse(e);
-        var mx = mouse.x;
-        var my = mouse.y;
-        //todo
-        game.bullets.push( new Bullet(mx, my, 10, 10, 'rgba(127, 255, 212, .5)') );
+         e.preventDefault();
+        game.mouse = game.getMouse(e);
+        game.addBullet = true;
       }, true);
      canvas.addEventListener('mousemove', function(e) {
+          e.preventDefault();
+        game.mouse = game.getMouse(e);
+                
+      }, true);
+     canvas.addEventListener('touchmove', function(e) {
+          e.preventDefault();
         game.mouse = game.getMouse(e);
                 
       }, true);
