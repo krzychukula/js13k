@@ -1,3 +1,4 @@
+
 (function() {
     var lastTime = 0;
     var vendors = ['ms', 'moz', 'webkit', 'o'];
@@ -46,7 +47,7 @@ Game.prototype.clear = function(){
 }
 
 Game.prototype.draw = function(){
-    var shapes = this.shapes;
+    var shapes = this.bullets;
     this.clear();
  
     // ** Add stuff you want drawn in the background all the time here **
@@ -54,7 +55,7 @@ Game.prototype.draw = function(){
     this.viewfinder.draw(this.ctx, this.mouse);
  
     // draw all shapes
-    var l = shapes.length;
+    var l = ( shapes && shapes.length) ? shapes.length : 0;
     for (var i = 0; i < l; i++) {
       var shape = shapes[i];
       if(!shape) continue;
@@ -205,7 +206,7 @@ function init() {
         var mx = mouse.x;
         var my = mouse.y;
         //todo
-        game.shapes.push( new Bullet(mx, my, 10, 10, 'rgba(127, 255, 212, .5)') );
+        game.bullets.push( new Bullet(mx, my, 10, 10, 'rgba(127, 255, 212, .5)') );
       }, true);
      canvas.addEventListener('mousemove', function(e) {
         game.mouse = game.getMouse(e);
@@ -215,7 +216,7 @@ function init() {
 }
 
 function animate(dt) {
-    requestAnimationFrame( animate );
+    window.requestAnimationFrame( animate );
     game.draw(dt);
 
 }
