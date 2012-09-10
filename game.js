@@ -13,10 +13,15 @@ function Game(canvas, ctx){
     this.viewfinder = new Viewfinder(0, 0, 20, 20, 'rgb(0,0,0)');
     this.toClean = 0;
     this.enemiesToClean = 0;
+    that.addEnemy = 1;
     
     this.createEnemies = setInterval(function() {
         that.addEnemy = true;
-    }, 1000);
+    }, 500);
+    
+     this.createBullets = setInterval(function() {
+        that.addBullet = true;
+    }, 200);
     
 }
 Game.prototype.clear = function(){
@@ -27,7 +32,7 @@ Game.prototype.clear = function(){
 
 
 Game.prototype.draw = function(){
-    this.clear();
+    
     
     if(this.addBullet){
         var mouse = this.mouse;
@@ -45,6 +50,41 @@ Game.prototype.draw = function(){
     //enemies
     var enemies = this.enemies;
     var l = ( enemies && enemies.length) ? enemies.length : 0;
+    //Bullets
+    var bullets = this.bullets;
+    var bl = ( bullets && bullets.length) ? bullets.length : 0;
+    if(l && bl){
+        for (var i = 0; i < l; i++) {
+            var enemy = enemies[i];
+            if(enemy){
+                for (var j = 0; j < bl; j++) {
+                    var b = bullets[j];
+                    if(b){
+                        //enemy.xx = enemy.x + enemy.w;  
+                        //enemy.yy = enemy.y + enemy.h;
+                        //bullet.xx = bullet.x + bullet.w;
+                        //bullet.yy = bullet.y + bullet.w;
+                       
+                       //look for collisions
+                        if(enemy.x < b.x + b.w&&
+                         enemy.x + enemy.w > b.x - b.w &&
+                         enemy.y < b.y - b.w &&
+                         enemy.y + enemy.h > b.y - b.w){
+                             console.log('BUUM!!!!');
+                             enemies[i] = false;
+                             bullets[j] = false;
+                             this.enemiesToClean++;
+                             this.toClean++;
+                        }
+                       
+                    }
+                }
+            }
+        }
+    }
+    
+    this.clear();
+    
     for (var i = 0; i < l; i++) {
       var enemy = enemies[i];
       
@@ -61,16 +101,8 @@ Game.prototype.draw = function(){
     
     
     
-    //Bullets
-    var bullets = this.bullets;
-    
- 
-
-    this.viewfinder.draw(this.ctx, this.mouse);
- 
-    // draw all bullets
-    var l = ( bullets && bullets.length) ? bullets.length : 0;
-    for (var i = 0; i < l; i++) {
+    //draw bullets
+    for (var i = 0; i < bl; i++) {
       var bullet = bullets[i];
       
       // We can skip the drawing of elements that have moved off the screen:
@@ -87,6 +119,7 @@ Game.prototype.draw = function(){
     
     // ** Add stuff you want drawn in the background all the time here **
     this.tower.draw(this.ctx, this.mouse);
+    this.viewfinder.draw(this.ctx, this.mouse);
     
     if(this.toClean > 2){
         //console.log('clean', l);

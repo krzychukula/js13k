@@ -17,25 +17,23 @@ function Bullet(x, y, w, dx, dy, fill) {
 Bullet.prototype.draw = function(ctx) {
     //ctx.save();
     
-    
-    context.beginPath();    
-    
+    ctx.fillStyle = this.fill;
+    context.beginPath();        
     //ctx.translate(game.tower.x, game.tower.y);
     //ctx.rotate(this.angle); 
-    //ctx.fillStyle = 'rgba(0,245,245, 0.1 )';
-    //context.fillRect(0, 0, 200, 200);
-          
-    ctx.fillStyle = this.fill;
     context.arc( this.x, this.y, this.w, 0, Math.PI * 2, true );
     context.closePath();
     context.fill();
-     ctx.restore();
+    // ctx.restore();
+    
+    //ctx.fillStyle = 'rgba(0,245,245, 0.4 )';
+    //context.fillRect(this.x-this.w, this.y-this.w, this.w*2, this.w*2);
      
     this.updatePosition(ctx);
   //ctx.fillRect(this.x, this.y, this.w, this.h);
 };
 
 Bullet.prototype.updatePosition = function(ctx) {
-    this.x = this.x + (this.dx * 1);
-    this.y = this.y + (this.dy * 1);
+    this.x = this.x + (this.dx * 3);
+    this.y = this.y + (this.dy * 3);
 };
