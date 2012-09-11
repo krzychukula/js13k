@@ -15,11 +15,13 @@ function init() {
 
     document.body.appendChild( canvas );
     //listeners
-//    canvas.addEventListener('click', function(e) {
-//         e.preventDefault();
-//        game.mouse = game.getMouse(e);
-//        game.addBullet = true;
-//      }, true);
+    function addBullet(e) {
+         e.preventDefault();
+        game.mouse = game.getMouse(e);
+        game.addBullet = true;
+    }
+    canvas.addEventListener('click', addBullet, true);
+    canvas.addEventListener('touchstart', addBullet, true);
      canvas.addEventListener('mousemove', function(e) {
           e.preventDefault();
         game.mouse = game.getMouse(e);

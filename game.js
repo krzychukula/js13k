@@ -9,6 +9,14 @@ function Game(canvas, ctx){
     this.mouse = {x: this.width/2, y: 0};
     this.bullets = [];
     this.enemies = [];
+    
+    this.currentLevel = 0;
+    this.levels = [{
+        bulletsTimeout: 400,
+        enemiesTimeout: 600,
+        startEnemies: 30,
+        enemies: 30
+    }];
     this.tower = new Tower(this.width/2, this.height, 10, 20, 'rgb(0,0,0)');
     this.viewfinder = new Viewfinder(0, 0, 20, 20, 'rgb(0,0,0)');
     this.toClean = 0;
@@ -16,39 +24,74 @@ function Game(canvas, ctx){
     this.addEnemy = 1;
     this.score = 0;
     this.lifes = 3;
+    this.beforeStart = true;
     this.tweetHandler = false;
     
-    
-    this.createEnemies = setInterval(function() {
-        that.addEnemy = true;
-    }, 1000);
-    
-     this.createBullets = setInterval(function() {
+    this.bulletsTimeout = 400;
+    function bulletsFactory(){
         that.addBullet = true;
-    }, 400);
+        that.bulletsTimeout -= 0.1;
+        setTimeout(bulletsFactory, that.bulletsTimeout);
+    }
+    bulletsFactory();
     
-}
-Game.prototype.clear = function(){
-    this.ctx.fillStyle = 'rgb(245,245,245)';
-    this.ctx.fillRect( 0, 0, 255, 255 );
+    this.enemiesTimeout = 600;
+    function enemiesFactory(){
+        that.addEnemy = true;
+        that.enemiesTimeout -= 0.9;
+        setTimeout(enemiesFactory, that.enemiesTimeout);
+    }
+    enemiesFactory();
+    
+//    this.createEnemies = setInterval(function() {
+//        that.addEnemy = true;
+//    }, 1000);
+    
+//     this.createBullets = setInterval(function() {
+//        that.addBullet = true;
+//    }, 400);
+    
 }
 
-Game.prototype.drawResult = function(ctx){    
-    ctx.fillStyle = 'red';
-    ctx.font = "italic 30pt Calibri";
-    ctx.fillText("GAME OVER!", 10, 90);
-    ctx.font = "italic 20pt Calibri";
-    ctx.fillText("Killed: " + this.score, 70, 140);
-    ctx.fillStyle = 'blue';
-    ctx.font = "italic 15pt Calibri";
-    ctx.fillText("Click to tweet your score!", 20, 180);
-    ctx.font = "italic 10pt Calibri";
-    ctx.fillText("Refresh to play again :)", 60, 200);
+Game.prototype.startFactories = function(){
+    
 }
+
+Game.prototype.image = new Image();
+Game.prototype.image.src = 'data:image/  png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QAAAAAAAD5Q7t/AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3AkLDSMPVfdqJwAAAWRJREFUOMttk79rwlAQxz9B5UEEFwmCZigGMhQydyiEjkKhf1P/HbeOmfo3FC2CgpkMFDIIAVOC2nSwl96L3vbuvbv7/rjnHA5v9XZXkaU5k6lH4Btcd4BEWRZsdxWBb9juqiYvZ2exntf6UjeSQmkozbI0B2Ay9ei8PD+9njqGwDfsizOPD3eMhn2Ox4p9cebz44vvHxgN+/R6htGwz3hsOHUMWZrj1PV7LZ11BL4BuJnXlJzFel5naU4c+xY8gDj2AXDdAUmyas6SA+gKF4Ao9Kzp+uFsdm8hKcsCwKYgha47sAQTUdt3AI7YKNNvqa1RiivyxrIxS3MLqsDU6DSthkKSrJop7YUqy6IpWG5ya6Gi0Ls0WG7yK+v0Qz29bauzWM/rKPSsSRq+LrxlcTfwDf8ILsKIoHqaXl+txdVfaG+bjraFzSK14YH3d/Zaol2aRCEN5W4bnqgvumgK4pA4UJYFvxvMELAqKY7sAAAAAElFTkSuQmCC';
+
+Game.prototype.clear = function(){
+    this.ctx.fillStyle = 'rgb(245,245,245)';
+    this.ctx.fillRect( 0, 0, 255, 255 );    
+}
+
+Game.prototype.tile = function(){
+    
+    for (x = 0; x <= this.width; x = x + 16) {
+            for (y = 0; y <= this.width; y = y + 16) {
+                this.ctx.drawImage(this.image, x, y);
+            }
+        }
+    
+}
+
+
 
 
 Game.prototype.draw = function(){
     var that = this;
+    if(this.beforeStart){
+        this.clear();
+        this.drawSplash(this.ctx);
+        this.canvas.addEventListener('click', function(e){
+            var timeout = 0;
+            if(that.blockClick){
+                return;   
+            }           
+            that.beforeStart = false;
+        });        
+        return;   
+    }
     if(this.lifes < 1){
         this.clear();
         this.drawResult(this.ctx);  
@@ -74,11 +117,19 @@ Game.prototype.draw = function(){
         game.bullets.push( new Bullet(game.tower.x + (20 * d.dx), game.tower.y + (20 * d.dy), 5, d.dx, d.dy, 'rgba(0, 0, 0, 1)') );
         this.addBullet = false;
     }
-    if(this.addEnemy){
+    
+    var level = this.levels[this.currentLevel];
+    
+    
+    
+    
+    if(level.enemies && this.addEnemy){
+        
         var x = Math.floor(Math.random() * (this.width - 26)) + 2;
         //var x = Math.floor(Math.random() * (this.width /2)) + this.width /2;
         game.enemies.push( new Enemy(x, 0, 26, 32, 'rgba(125, 50, 50, 1)') );
         this.addEnemy = false;
+        level.enemies--;
     }
     //enemies
     var enemies = this.enemies;
@@ -93,7 +144,7 @@ Game.prototype.draw = function(){
     if(l && bl){
         for (var i = 0; i < l; i++) {
             var enemy = enemies[i];
-            if(enemy){
+            if(enemy && enemy.live){
                 for (var j = 0; j < bl; j++) {
                     var b = bullets[j];
                     if(b){
@@ -131,7 +182,7 @@ Game.prototype.draw = function(){
                         
                         if(collision){
                             console.log('BUUM!!!!');
-                             enemies[i] = false;
+                             enemies[i].kill();
                              bullets[j] = false;
                              this.enemiesToClean++;
                              this.toClean++;
@@ -145,7 +196,7 @@ Game.prototype.draw = function(){
         }
     }
     
-    this.clear();
+    this.tile();
     
     for (var i = 0; i < l; i++) {
       var enemy = enemies[i];
@@ -162,11 +213,15 @@ Game.prototype.draw = function(){
               this.enemiesToClean++;
               continue;
               
-        }else{
+        }else{            
             enemies[i].draw(this.ctx, i);
+            if(enemy.toRemove){
+                enemies[i] = false;
+                this.enemiesToClean++;
+            }
         }
+        
     }
-    
     
     
     //draw bullets
@@ -182,11 +237,11 @@ Game.prototype.draw = function(){
               
         }else{
             bullets[i].draw(this.ctx, i);
+            
         }
     }
     
-    this.drawScore(this.ctx);
-    this.drawLifes(this.ctx);
+    this.drawInfo(this.ctx);
     
     // ** Add stuff you want drawn in the background all the time here **
     this.tower.draw(this.ctx, this.mouse);
@@ -198,23 +253,86 @@ Game.prototype.draw = function(){
         //console.log('cleaned: ', this.bullets.length);
         this.toClean = 0;
     }
-    if(this.enemiesToClean > 2){
+    if(this.enemiesToClean > 0){
         //console.log('enemies clean', l);
         this.enemies = enemies.filter(function(e){return e});
         //console.log('enemies cleaned: ', this.enemies.length);
         this.enemiesToClean = 0;
     }
+    
+    
+    if(!level.enemies && !this.enemies.length){
+     //todo change level   
+     this.changeLevel();
+    }
+    
+    
+}
+
+Game.prototype.changeLevel = function(){
+    var that = this;
+ this.enemies = [];
+ this.bullets = [];
+ this.currentLevel++;
+ this.beforeStart = true;
+ if(!this.levels[this.currentLevel]){
+    this.levels[this.currentLevel] = this.levels[this.currentLevel - 1];
+    this.levels[this.currentLevel].enemiesTimeout -= 50;
+    this.levels[this.currentLevel].bulletsTimeout -= 25;
+    this.levels[this.currentLevel].enemies = this.levels[this.currentLevel].startEnemies += 10;
+ }
+ var level = this.levels[this.currentLevel];
+ this.bulletsTimeout = level.bulletsTimeout;
+ this.enemiesTimeout = level.enemiesTimeout;
+ this.blockClick = true;
+ setTimeout(function(){
+     that.blockClick = false;
+ }, 200);
 }
 
 
-Game.prototype.drawScore = function(ctx){
-    ctx.font = "italic 10pt Calibri";
-    ctx.fillText("SCORE: " + this.score, this.width - 80, this.height - 10);
+Game.prototype.drawInfo = function(ctx){
+    ctx.fillStyle = 'red';
+    ctx.font = "bold 30pt Calibri";
+    ctx.fillText(new Array(this.lifes+1).join("♥"), 20, this.height - 10);
+    
+    ctx.fillStyle = 'rgba(0,0,0, 0.9)';
+    ctx.font = "bold 14pt Calibri";
+    ctx.fillText("SCORE: " + this.score, this.width / 2 + 20, this.height - 10);
+    
+    ctx.fillStyle = 'rgba(0,0,0, 0.6)';
+    ctx.font = "bold 12pt Calibri";
+    ctx.fillText("Level: " + (this.currentLevel+1) + ' wave:'+this.levels[this.currentLevel].enemies, 10, 14);
 }
 
-Game.prototype.drawLifes = function(ctx){
+Game.prototype.drawResult = function(ctx){    
+    ctx.fillStyle = 'red';
+    ctx.font = "italic 30pt Calibri";
+    ctx.fillText("GAME OVER!", 10, 90);
+    ctx.font = "italic 20pt Calibri";
+    ctx.fillText("Killed: " + this.score, 70, 140);
+    ctx.fillStyle = 'blue';
+    ctx.font = "italic 15pt Calibri";
+    ctx.fillText("Click to tweet your score!", 20, 180);
     ctx.font = "italic 10pt Calibri";
-    ctx.fillText("Lifes: " + this.lifes, 10, this.height - 10);
+    ctx.fillText("Refresh to play again :)", 60, 200);
+}
+
+Game.prototype.drawSplash = function(ctx){ 
+    if(this.currentLevel == 0){
+            
+        ctx.fillStyle = 'black';
+        ctx.font = "bold 20pt Calibri";
+        ctx.fillText("Click or tap to start!", 10, 100);
+        ctx.font = "13pt Calibri";
+        ctx.fillText("Tip: click or tap for instant fire", 10, 200);
+    }else{
+        ctx.fillStyle = 'black';
+        ctx.font = "bold 18pt Calibri";
+        ctx.fillText("Click or start level: " + (this.currentLevel+1) , 10, 100);
+        ctx.font = "13pt Calibri";
+        ctx.fillText("Tip: click or tap for instant fire", 10, 200);
+    }
 }
 
 

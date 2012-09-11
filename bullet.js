@@ -10,6 +10,7 @@ function Bullet(x, y, w, dx, dy, fill) {
   this.w = w || 1;
   this.dx = dx || 0.5;
   this.dy = dy || 0.5;
+  this.speed = 5;
   this.fill = fill || '#AAAAAA';
 }
  
@@ -18,12 +19,12 @@ Bullet.prototype.draw = function(ctx, num) {
     //ctx.save();
     
     ctx.fillStyle = this.fill;
-    context.beginPath();        
+    ctx.beginPath();        
     //ctx.translate(game.tower.x, game.tower.y);
     //ctx.rotate(this.angle); 
-    context.arc( this.x, this.y, this.w, 0, Math.PI * 2, true );
-    context.closePath();
-    context.fill();
+    ctx.arc( this.x, this.y, this.w, 0, Math.PI * 2, true );
+    ctx.closePath();
+    ctx.fill();
     // ctx.restore();
     
     //ctx.fillStyle = 'rgba(0,245,245, 0.4 )';
@@ -39,6 +40,6 @@ Bullet.prototype.draw = function(ctx, num) {
 };
 
 Bullet.prototype.updatePosition = function(ctx) {
-    this.x = this.x + (this.dx * 3);
-    this.y = this.y + (this.dy * 3);
+    this.x = this.x + (this.dx * this.speed);
+    this.y = this.y + (this.dy * this.speed);
 };
