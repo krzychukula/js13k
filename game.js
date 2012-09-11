@@ -75,7 +75,8 @@ Game.prototype.draw = function(){
         this.addBullet = false;
     }
     if(this.addEnemy){
-        var x = Math.floor(Math.random() * this.width) + 1;
+        var x = Math.floor(Math.random() * (this.width - 26)) + 2;
+        //var x = Math.floor(Math.random() * (this.width /2)) + this.width /2;
         game.enemies.push( new Enemy(x, 0, 26, 32, 'rgba(125, 50, 50, 1)') );
         this.addEnemy = false;
     }
@@ -85,6 +86,10 @@ Game.prototype.draw = function(){
     //Bullets
     var bullets = this.bullets;
     var bl = ( bullets && bullets.length) ? bullets.length : 0;
+    
+    var collision = false;
+    var yCollision = false;
+    
     if(l && bl){
         for (var i = 0; i < l; i++) {
             var enemy = enemies[i];
@@ -92,24 +97,46 @@ Game.prototype.draw = function(){
                 for (var j = 0; j < bl; j++) {
                     var b = bullets[j];
                     if(b){
-                        //enemy.xx = enemy.x + enemy.w;  
-                        //enemy.yy = enemy.y + enemy.h;
-                        //bullet.xx = bullet.x + bullet.w;
-                        //bullet.yy = bullet.y + bullet.w;
-                       
-                       //look for collisions
-                        if(enemy.x < b.x + b.w&&
-                         enemy.x + enemy.w > b.x - b.w &&
-                         enemy.y < b.y - b.w &&
-                         enemy.y + enemy.h > b.y - b.w){
-                             console.log('BUUM!!!!');
+                        collision = false;
+                        yCollision = false;
+                        
+                        //a.y < b.y + b.height &&
+                        // a.y + a.height > b.y
+                        var eTopY = enemy.y;
+                        var eBottomY = enemy.y + enemy.h;
+                        var bTopY = b.y - b.w;
+                        var bBottomY = b.y + b.w;
+                        if( eTopY < bBottomY &&
+                         eBottomY > bTopY){
+                           //console.log('y collision b:'+j+' e:'+i);
+                           yCollision = true;
+                             
+                        }
+                        
+                        //look for collisions
+                        var eLeftX = enemy.x;
+                        var eRightX = enemy.x + enemy.w;
+                        var bLeftX = b.x - b.w;
+                        var bRightX = b.x + b.w;
+                        
+                        if(yCollision && 
+                         eLeftX < bRightX &&
+                         eRightX > bLeftX ){
+                           //console.log('x collision b:'+j+' e:'+i);
+                           collision = true;
+                             
+                        }
+                        
+                        
+                        
+                        if(collision){
+                            console.log('BUUM!!!!');
                              enemies[i] = false;
                              bullets[j] = false;
                              this.enemiesToClean++;
                              this.toClean++;
                              this.score++;
                              break;
-                             
                         }
                        
                     }
@@ -136,7 +163,7 @@ Game.prototype.draw = function(){
               continue;
               
         }else{
-            enemies[i].draw(this.ctx);
+            enemies[i].draw(this.ctx, i);
         }
     }
     
@@ -154,7 +181,7 @@ Game.prototype.draw = function(){
               this.toClean++;
               
         }else{
-            bullets[i].draw(this.ctx);
+            bullets[i].draw(this.ctx, i);
         }
     }
     

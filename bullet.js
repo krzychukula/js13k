@@ -14,7 +14,7 @@ function Bullet(x, y, w, dx, dy, fill) {
 }
  
 // Draws this shape to a given context
-Bullet.prototype.draw = function(ctx) {
+Bullet.prototype.draw = function(ctx, num) {
     //ctx.save();
     
     ctx.fillStyle = this.fill;
@@ -28,6 +28,11 @@ Bullet.prototype.draw = function(ctx) {
     
     //ctx.fillStyle = 'rgba(0,245,245, 0.4 )';
     //context.fillRect(this.x-this.w, this.y-this.w, this.w*2, this.w*2);
+    
+    
+    //ctx.fillStyle = 'red';
+    //ctx.font = "10pt Calibri";
+    //ctx.fillText(num, this.x-this.w, this.y-this.w);
      
     this.updatePosition(ctx);
   //ctx.fillRect(this.x, this.y, this.w, this.h);
