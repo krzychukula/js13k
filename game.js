@@ -62,7 +62,7 @@ Game.prototype.image.src = 'data:image/  png;base64,iVBORw0KGgoAAAANSUhEUgAAABAA
 
 Game.prototype.clear = function(){
     this.ctx.fillStyle = 'rgb(245,245,245)';
-    this.ctx.fillRect( 0, 0, 255, 255 );    
+    this.ctx.fillRect( 0, 0, this.width, this.height );    
 }
 
 Game.prototype.tile = function(){
@@ -101,7 +101,7 @@ Game.prototype.draw = function(){
                 window.open( 'https://twitter.com/share?url='+
                     encodeURIComponent(location.href)+
                     '&text='+
-                    encodeURIComponent('Just ended canon defense! My score is: ' + that.score + '. Try the game at: ')
+                    encodeURIComponent('Just ended Canon Defense! One of #js13kgames My score is: ' + that.score + '. Try the game at: ')
                 ,'_blank' );
             });
             this.tweetHandler = true;
