@@ -29,8 +29,7 @@ function Game(canvas, ctx){
     
     this.bulletsTimeout = 400;
     function bulletsFactory(){
-        that.addBullet = true;
-        that.bulletsTimeout -= 0.1;
+        that.addBullet = true;        
         setTimeout(bulletsFactory, that.bulletsTimeout);
     }
     bulletsFactory();
@@ -38,7 +37,6 @@ function Game(canvas, ctx){
     this.enemiesTimeout = 600;
     function enemiesFactory(){
         that.addEnemy = true;
-        that.enemiesTimeout -= 0.9;
         setTimeout(enemiesFactory, that.enemiesTimeout);
     }
     enemiesFactory();
@@ -111,7 +109,7 @@ Game.prototype.draw = function(){
     
     if(this.addBullet){
         var mouse = this.mouse;
-
+        that.bulletsTimeout -= 0.1;
         //todo
         var d = game.tower.getDiffs(mouse);
         game.bullets.push( new Bullet(game.tower.x + (20 * d.dx), game.tower.y + (20 * d.dy), 5, d.dx, d.dy, 'rgba(0, 0, 0, 1)') );
@@ -124,6 +122,8 @@ Game.prototype.draw = function(){
     
     
     if(level.enemies && this.addEnemy){
+        
+        this.enemiesTimeout -= 0.9;
         
         var x = Math.floor(Math.random() * (this.width - 26)) + 2;
         //var x = Math.floor(Math.random() * (this.width /2)) + this.width /2;
