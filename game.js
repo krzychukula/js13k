@@ -7,6 +7,8 @@ function Game(canvas, ctx){
     this.width = canvas.width;
     this.height = canvas.height;
     this.mouse = {x: this.width/2, y: 0};
+    this.bulletsPool = [];
+    this.enemiesPool = [];
     this.bullets = [];
     this.enemies = [];
     
@@ -64,12 +66,23 @@ Game.prototype.clear = function(){
 }
 
 Game.prototype.tile = function(){
+    if(!this.tileCanvas){
+        this.tileCanvas = document.createElement( 'canvas' );
     
-    for (x = 0; x <= this.width; x = x + 16) {
+        this.tileCanvas.width = this.width;
+        this.tileCanvas.height = this.height;
+    
+        this.tileCanvasCtx = this.tileCanvas.getContext( '2d' );
+        
+        for (x = 0; x <= this.width; x = x + 16) {
             for (y = 0; y <= this.width; y = y + 16) {
-                this.ctx.drawImage(this.image, x, y);
+                this.tileCanvasCtx.drawImage(this.image, x, y);
             }
         }
+        //document.body.appendChild( this.tileCanvas );
+    }
+    
+    this.ctx.drawImage(this.tileCanvas, 0, 0);
     
 }
 
@@ -94,25 +107,41 @@ Game.prototype.draw = function(){
         this.clear();
         this.drawResult(this.ctx);  
         
-        if(!this.tweetHandler){
-            this.canvas.addEventListener('click', function(e){
-                window.open( 'https://twitter.com/share?url='+
-                    encodeURIComponent(location.href)+
-                    '&text='+
-                    encodeURIComponent('Just ended Canon Defense! One of #js13kgames My score is: ' + that.score + '. Try the game at: ')
-                ,'_blank' );
-            });
-            this.tweetHandler = true;
-        }
+//        if(!this.tweetHandler){
+//            this.canvas.addEventListener('click', function(e){
+//                window.open( 'https://twitter.com/share?url='+
+//                    encodeURIComponent(location.href)+
+//                    '&text='+
+//                    encodeURIComponent('Just ended Canon Defense! One of #js13kgames My score is: ' + that.score + '. Try the game at: ')
+//                ,'_blank' );
+//            });
+//            this.tweetHandler = true;
+//        }
         return;
     }
     
     if(this.addBullet){
         var mouse = this.mouse;
+        var newBullet; 
+    
         that.bulletsTimeout -= 0.1;
+        
         //todo
         var d = game.tower.getDiffs(mouse);
-        game.bullets.push( new Bullet(game.tower.x + (20 * d.dx), game.tower.y + (20 * d.dy), 5, d.dx, d.dy, 'rgba(0, 0, 0, 1)') );
+        var x = game.tower.x + (20 * d.dx);
+        var y = game.tower.y + (20 * d.dy);
+        if(game.bulletsPool.length){
+            
+           newBullet = game.bulletsPool.pop();
+           newBullet.x = x;
+           newBullet.y = y;
+           newBullet.dx = d.dx;
+           newBullet.dy = d.dy;
+        }else{
+            newBullet = new Bullet(x, y, 5, d.dx, d.dy, 'rgba(0, 0, 0, 1)');
+        }
+            
+        game.bullets.push( newBullet );
         this.addBullet = false;
     }
     
@@ -126,8 +155,19 @@ Game.prototype.draw = function(){
         this.enemiesTimeout -= 0.9;
         
         var x = Math.floor(Math.random() * (this.width - 26)) + 2;
-        //var x = Math.floor(Math.random() * (this.width /2)) + this.width /2;
-        game.enemies.push( new Enemy(x, 0, 26, 32, 'rgba(125, 50, 50, 1)') );
+        var newEnemy;
+    
+        if(game.enemiesPool.length){
+            
+           newEnemy = game.enemiesPool.pop();
+           newEnemy.reset();
+           newEnemy.x = x;
+           
+        }else{
+            newEnemy = new Enemy(x, 0, 26, 32, 'rgba(125, 50, 50, 1)') 
+        }
+    
+        game.enemies.push( newEnemy );
         this.addEnemy = false;
         level.enemies--;
     }
@@ -183,6 +223,9 @@ Game.prototype.draw = function(){
                         if(collision){
                             console.log('BUUM!!!!');
                              enemies[i].kill();
+                             if(b){
+                                this.bulletsPool.push(b);
+                             }
                              bullets[j] = false;
                              this.enemiesToClean++;
                              this.toClean++;
@@ -208,7 +251,9 @@ Game.prototype.draw = function(){
               if(enemy){
                 this.lifes--;
               }
-              
+              if(enemy){
+                  this.enemiesPool.push(enemy);
+              }
               enemies[i] = false;
               this.enemiesToClean++;
               continue;
@@ -216,6 +261,9 @@ Game.prototype.draw = function(){
         }else{            
             enemies[i].draw(this.ctx, i);
             if(enemy.toRemove){
+                if(enemy){
+                    this.enemiesPool.push(enemy);
+                }
                 enemies[i] = false;
                 this.enemiesToClean++;
             }
@@ -230,8 +278,10 @@ Game.prototype.draw = function(){
       
       // We can skip the drawing of elements that have moved off the screen:
       if (!bullet || bullet.x > this.width || bullet.y > this.height ||
-          bullet.x + bullet.w < 0 || bullet.y + bullet.h < 0 || bullet.offset > this.height){
-              
+          bullet.x + bullet.w < 0 || bullet.y + bullet.h < 0 ){
+              if(bullet){
+                this.bulletsPool.push(bullet);
+              }
               bullets[i] = false;
               this.toClean++;
               

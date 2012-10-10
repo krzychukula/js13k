@@ -32,8 +32,16 @@ Enemy.prototype.kill = function(){
    var that = this;
    setTimeout(function() {
        that.toRemove = true;
-   }, 500);
+   }, 1500);
    
+}
+
+Enemy.prototype.reset = function(){
+    this.live = true;
+    this.toRemove  = false;
+    this.opacity = 1;
+    this.y = 0;
+    this.spriteX = 0;
 }
 
 Enemy.prototype.draw = function(ctx, num){
