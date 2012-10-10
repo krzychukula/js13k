@@ -1,17 +1,17 @@
 
-function Game(canvas, ctx){
+function Game(canvas, ctx, width, height){
     var that = this;
-    
+
     this.canvas = canvas;
     this.ctx = ctx;
-    this.width = canvas.width;
-    this.height = canvas.height;
+    this.width = width;
+    this.height = height;
     this.mouse = {x: this.width/2, y: 0};
     this.bulletsPool = [];
     this.enemiesPool = [];
     this.bullets = [];
     this.enemies = [];
-    
+
     this.currentLevel = 0;
     this.levels = [{
         bulletsTimeout: 400,
@@ -28,147 +28,154 @@ function Game(canvas, ctx){
     this.lifes = 3;
     this.beforeStart = true;
     this.tweetHandler = false;
-    
-    this.bulletsTimeout = 400;
-    function bulletsFactory(){
-        that.addBullet = true;        
-        setTimeout(bulletsFactory, that.bulletsTimeout);
-    }
-    bulletsFactory();
-    
-    this.enemiesTimeout = 600;
-    function enemiesFactory(){
-        that.addEnemy = true;
-        setTimeout(enemiesFactory, that.enemiesTimeout);
-    }
-    enemiesFactory();
-    
-//    this.createEnemies = setInterval(function() {
-//        that.addEnemy = true;
-//    }, 1000);
-    
-//     this.createBullets = setInterval(function() {
-//        that.addBullet = true;
-//    }, 400);
-    
+
+    this.lastBulletTime = 0;
+    this.lastEnemyTime = 0;
+
+     this.bulletsTimeout = 400;
+     this.enemiesTimeout = 600;
+
+     this.canvas.addEventListener('click', Game.prototype.startGame.bind(this));
+        this.canvas.addEventListener('touchstart', Game.prototype.startGame.bind(this));
+
+         this.resetGameListener = this.resetGame.bind(this);
+        this.canvas.addEventListener('click', this.resetGameListener, false);
 }
 
+Game.prototype.resetGame = function() {
+    if(this.lifes > 0) return;
+    this.beforeStart = true;
+    this.currentLevel = 0;
+    this.updateLevel();
+    this.score = 0;
+    this.lifes = 3;
+    this.canvas.removeEventListener('click', this.resetGameListener, false);
+};
+
 Game.prototype.startFactories = function(){
-    
-}
+
+};
 
 Game.prototype.image = new Image();
 Game.prototype.image.src = 'data:image/  png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QAAAAAAAD5Q7t/AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3AkLDSMPVfdqJwAAAWRJREFUOMttk79rwlAQxz9B5UEEFwmCZigGMhQydyiEjkKhf1P/HbeOmfo3FC2CgpkMFDIIAVOC2nSwl96L3vbuvbv7/rjnHA5v9XZXkaU5k6lH4Btcd4BEWRZsdxWBb9juqiYvZ2exntf6UjeSQmkozbI0B2Ay9ei8PD+9njqGwDfsizOPD3eMhn2Ox4p9cebz44vvHxgN+/R6htGwz3hsOHUMWZrj1PV7LZ11BL4BuJnXlJzFel5naU4c+xY8gDj2AXDdAUmyas6SA+gKF4Ao9Kzp+uFsdm8hKcsCwKYgha47sAQTUdt3AI7YKNNvqa1RiivyxrIxS3MLqsDU6DSthkKSrJop7YUqy6IpWG5ya6Gi0Ls0WG7yK+v0Qz29bauzWM/rKPSsSRq+LrxlcTfwDf8ILsKIoHqaXl+txdVfaG+bjraFzSK14YH3d/Zaol2aRCEN5W4bnqgvumgK4pA4UJYFvxvMELAqKY7sAAAAAElFTkSuQmCC';
 
 Game.prototype.clear = function(){
     this.ctx.fillStyle = 'rgb(245,245,245)';
-    this.ctx.fillRect( 0, 0, this.width, this.height );    
-}
+    this.ctx.fillRect( 0, 0, this.width, this.height );
+
+};
 
 Game.prototype.tile = function(){
     if(!this.tileCanvas){
         this.tileCanvas = document.createElement( 'canvas' );
-    
+
         this.tileCanvas.width = this.width;
         this.tileCanvas.height = this.height;
-    
+
         this.tileCanvasCtx = this.tileCanvas.getContext( '2d' );
-        
+
         for (x = 0; x <= this.width; x = x + 16) {
-            for (y = 0; y <= this.width; y = y + 16) {
+            for (y = 0; y <= this.height; y = y + 16) {
                 this.tileCanvasCtx.drawImage(this.image, x, y);
             }
         }
         //document.body.appendChild( this.tileCanvas );
     }
-    
+
     this.ctx.drawImage(this.tileCanvas, 0, 0);
-    
-}
+
+};
+
+Game.prototype.startGame = function(e) {
+
+    if(this.blockClick){
+        return;
+    }
+    this.beforeStart = false;
+};
 
 
 
-
-Game.prototype.draw = function(){
-    var that = this;
+Game.prototype.frame = function(date){
     if(this.beforeStart){
         this.clear();
         this.drawSplash(this.ctx);
-        this.canvas.addEventListener('click', function(e){
-            var timeout = 0;
-            if(that.blockClick){
-                return;   
-            }           
-            that.beforeStart = false;
-        });        
-        return;   
+
+        return;
     }
     if(this.lifes < 1){
         this.clear();
-        this.drawResult(this.ctx);  
-        
-//        if(!this.tweetHandler){
-//            this.canvas.addEventListener('click', function(e){
-//                window.open( 'https://twitter.com/share?url='+
-//                    encodeURIComponent(location.href)+
-//                    '&text='+
-//                    encodeURIComponent('Just ended Canon Defense! One of #js13kgames My score is: ' + that.score + '. Try the game at: ')
-//                ,'_blank' );
-//            });
-//            this.tweetHandler = true;
-//        }
+        this.drawResult(this.ctx);
+
         return;
     }
-    
-    if(this.addBullet){
+
+    this.draw(date);
+};
+
+
+
+
+Game.prototype.draw = function(date){
+    //var that = this;
+    var i, enemy;
+
+    this.mouse = this.getMouse(this.e);
+
+    var bulletDiff = date - this.lastBulletTime;
+
+
+    if(this.addBullet || bulletDiff > this.bulletsTimeout){
         var mouse = this.mouse;
-        var newBullet; 
-    
-        that.bulletsTimeout -= 0.1;
-        
+        var newBullet;
+
+        this.bulletsTimeout -= 0.1;
+
         //todo
         var d = game.tower.getDiffs(mouse);
-        var x = game.tower.x + (20 * d.dx);
+        var bx = game.tower.x + (20 * d.dx);
         var y = game.tower.y + (20 * d.dy);
         if(game.bulletsPool.length){
-            
+
            newBullet = game.bulletsPool.pop();
-           newBullet.x = x;
+           newBullet.x = bx;
            newBullet.y = y;
            newBullet.dx = d.dx;
            newBullet.dy = d.dy;
         }else{
-            newBullet = new Bullet(x, y, 5, d.dx, d.dy, 'rgba(0, 0, 0, 1)');
+            newBullet = new Bullet(bx, y, 5, d.dx, d.dy, 'rgba(0, 0, 0, 1)');
         }
-            
+
         game.bullets.push( newBullet );
         this.addBullet = false;
+        this.lastBulletTime = date;
     }
-    
+
     var level = this.levels[this.currentLevel];
-    
-    
-    
-    
-    if(level.enemies && this.addEnemy){
-        
+
+
+    var enemyDiff = date - this.lastEnemyTime;
+
+    if(level.enemies && enemyDiff > this.enemiesTimeout){
+
         this.enemiesTimeout -= 0.9;
-        
-        var x = Math.floor(Math.random() * (this.width - 26)) + 2;
+
+        var ex = Math.floor(Math.random() * (this.width - 26)) + 2;
         var newEnemy;
-    
+
         if(game.enemiesPool.length){
-            
+
            newEnemy = game.enemiesPool.pop();
            newEnemy.reset();
-           newEnemy.x = x;
-           
+           newEnemy.x = ex;
+
         }else{
-            newEnemy = new Enemy(x, 0, 26, 32, 'rgba(125, 50, 50, 1)') 
+            newEnemy = new Enemy(ex, 0, 26, 32, 'rgba(125, 50, 50, 1)');
         }
-    
+
         game.enemies.push( newEnemy );
-        this.addEnemy = false;
+        //this.addEnemy = false;
+        this.lastEnemyTime = date;
         level.enemies--;
     }
     //enemies
@@ -177,20 +184,20 @@ Game.prototype.draw = function(){
     //Bullets
     var bullets = this.bullets;
     var bl = ( bullets && bullets.length) ? bullets.length : 0;
-    
+
     var collision = false;
     var yCollision = false;
-    
+
     if(l && bl){
-        for (var i = 0; i < l; i++) {
-            var enemy = enemies[i];
+        for ( i = 0; i < l; i++) {
+            enemy = enemies[i];
             if(enemy && enemy.live){
                 for (var j = 0; j < bl; j++) {
                     var b = bullets[j];
                     if(b){
                         collision = false;
                         yCollision = false;
-                        
+
                         //a.y < b.y + b.height &&
                         // a.y + a.height > b.y
                         var eTopY = enemy.y;
@@ -201,25 +208,25 @@ Game.prototype.draw = function(){
                          eBottomY > bTopY){
                            //console.log('y collision b:'+j+' e:'+i);
                            yCollision = true;
-                             
+
                         }
-                        
+
                         //look for collisions
                         var eLeftX = enemy.x;
                         var eRightX = enemy.x + enemy.w;
                         var bLeftX = b.x - b.w;
                         var bRightX = b.x + b.w;
-                        
-                        if(yCollision && 
+
+                        if(yCollision &&
                          eLeftX < bRightX &&
                          eRightX > bLeftX ){
                            //console.log('x collision b:'+j+' e:'+i);
                            collision = true;
-                             
+
                         }
-                        
-                        
-                        
+
+
+
                         if(collision){
                             console.log('BUUM!!!!');
                              enemies[i].kill();
@@ -232,21 +239,21 @@ Game.prototype.draw = function(){
                              this.score++;
                              break;
                         }
-                       
+
                     }
                 }
             }
         }
     }
-    
+
     this.tile();
-    
-    for (var i = 0; i < l; i++) {
-      var enemy = enemies[i];
-      
+
+    for (i = 0; i < l; i++) {
+      enemy = enemies[i];
+
       // We can skip the drawing of elements that have moved off the screen:
       if (!enemy || enemy.y > this.height ){
-              
+
               //enemy at the bottom!!!!!
               if(enemy){
                 this.lifes--;
@@ -257,9 +264,9 @@ Game.prototype.draw = function(){
               enemies[i] = false;
               this.enemiesToClean++;
               continue;
-              
-        }else{            
-            enemies[i].draw(this.ctx, i);
+
+        }else{
+            enemies[i].draw(this.ctx, i, date);
             if(enemy.toRemove){
                 if(enemy){
                     this.enemiesPool.push(enemy);
@@ -268,14 +275,14 @@ Game.prototype.draw = function(){
                 this.enemiesToClean++;
             }
         }
-        
+
     }
-    
-    
+
+
     //draw bullets
-    for (var i = 0; i < bl; i++) {
+    for ( i = 0; i < bl; i++) {
       var bullet = bullets[i];
-      
+
       // We can skip the drawing of elements that have moved off the screen:
       if (!bullet || bullet.x > this.width || bullet.y > this.height ||
           bullet.x + bullet.w < 0 || bullet.y + bullet.h < 0 ){
@@ -284,78 +291,88 @@ Game.prototype.draw = function(){
               }
               bullets[i] = false;
               this.toClean++;
-              
+
         }else{
             bullets[i].draw(this.ctx, i);
-            
+
         }
     }
-    
+
     this.drawInfo(this.ctx);
-    
+
     // ** Add stuff you want drawn in the background all the time here **
     this.tower.draw(this.ctx, this.mouse);
     this.viewfinder.draw(this.ctx, this.mouse);
-    
+
     if(this.toClean > 2){
         //console.log('clean', l);
-        this.bullets = bullets.filter(function(e){return e});
+        this.bullets = bullets.filter(function(e){return e; });
         //console.log('cleaned: ', this.bullets.length);
         this.toClean = 0;
     }
     if(this.enemiesToClean > 0){
         //console.log('enemies clean', l);
-        this.enemies = enemies.filter(function(e){return e});
+        this.enemies = enemies.filter(function(e){return e; });
         //console.log('enemies cleaned: ', this.enemies.length);
         this.enemiesToClean = 0;
     }
-    
-    
+
+
     if(!level.enemies && !this.enemies.length){
-     //todo change level   
+     //todo change level
      this.changeLevel();
     }
-    
-    
-}
+
+
+};
 
 Game.prototype.changeLevel = function(){
-    var that = this;
- this.enemies = [];
- this.bullets = [];
- this.currentLevel++;
- this.beforeStart = true;
- if(!this.levels[this.currentLevel]){
+
+    this.currentLevel++;
+    this.updateLevel();
+};
+
+Game.prototype.updateLevel = function(){
+    //var that = this;
+    while(this.enemies.length){
+        this.enemiesPool.push(this.enemies.pop());
+    }
+    while(this.bullets.length){
+        this.bulletsPool.push(this.bullets.pop());
+    }
+    this.beforeStart = true;
+    if(!this.levels[this.currentLevel]){
     this.levels[this.currentLevel] = this.levels[this.currentLevel - 1];
     this.levels[this.currentLevel].enemiesTimeout -= 50;
     this.levels[this.currentLevel].bulletsTimeout -= 25;
     this.levels[this.currentLevel].enemies = this.levels[this.currentLevel].startEnemies += 10;
- }
- var level = this.levels[this.currentLevel];
- this.bulletsTimeout = level.bulletsTimeout;
- this.enemiesTimeout = level.enemiesTimeout;
- this.blockClick = true;
- setTimeout(function(){
-     that.blockClick = false;
- }, 200);
-}
+    }
+    var level = this.levels[this.currentLevel];
+    this.bulletsTimeout = level.bulletsTimeout;
+    this.enemiesTimeout = level.enemiesTimeout;
+    // this.blockClick = true;
+    // setTimeout(Game.prototype.runClicks.bind(this), 200);
+};
 
+Game.prototype.runClicks = function() {
+    this.blockClick = false;
+};
 
 Game.prototype.drawInfo = function(ctx){
     ctx.fillStyle = 'red';
     ctx.font = "bold 30pt Calibri";
     ctx.fillText(new Array(this.lifes+1).join("♥"), 20, this.height - 10);
-    
+
     ctx.fillStyle = 'rgba(0,0,0, 0.9)';
     ctx.font = "bold 14pt Calibri";
     ctx.fillText("SCORE: " + this.score, this.width / 2 + 20, this.height - 10);
-    
+
     ctx.fillStyle = 'rgba(0,0,0, 0.6)';
     ctx.font = "bold 12pt Calibri";
     ctx.fillText("Level: " + (this.currentLevel+1) + ' wave:'+this.levels[this.currentLevel].enemies, 10, 14);
-}
+};
 
-Game.prototype.drawResult = function(ctx){    
+Game.prototype.drawResult = function(ctx){
     ctx.fillStyle = 'red';
     ctx.font = "italic 30pt Calibri";
     ctx.fillText("GAME OVER!", 10, 90);
@@ -363,14 +380,12 @@ Game.prototype.drawResult = function(ctx){
     ctx.fillText("Killed: " + this.score, 70, 140);
     ctx.fillStyle = 'blue';
     ctx.font = "italic 15pt Calibri";
-    ctx.fillText("Click to tweet your score!", 20, 180);
-    ctx.font = "italic 10pt Calibri";
-    ctx.fillText("Refresh to play again :)", 60, 200);
-}
+    ctx.fillText("Click or tap to play again!", 20, 180);
+};
 
-Game.prototype.drawSplash = function(ctx){ 
-    if(this.currentLevel == 0){
-            
+Game.prototype.drawSplash = function(ctx){
+    if(this.currentLevel === 0){
+
         ctx.fillStyle = 'black';
         ctx.font = "bold 20pt Calibri";
         ctx.fillText("Click or tap to start!", 10, 100);
@@ -383,12 +398,12 @@ Game.prototype.drawSplash = function(ctx){
         ctx.font = "13pt Calibri";
         ctx.fillText("Tip: click or tap for instant fire", 10, 200);
     }
-}
+};
 
 
 Game.prototype.getMouse = function(e) {
   var element = canvas, offsetX = 0, offsetY = 0, mx, my;
- 
+
   // Compute the total offset
   if (element.offsetParent !== undefined) {
     do {
@@ -396,7 +411,7 @@ Game.prototype.getMouse = function(e) {
       offsetY += element.offsetTop;
     } while ((element = element.offsetParent));
   }
- 
+
   // Add padding and border style widths to offset
   // Also add the <html> offsets in case there's a position:fixed bar
   //offsetX += this.stylePaddingLeft + this.styleBorderLeft + this.htmlLeft;
@@ -408,9 +423,9 @@ Game.prototype.getMouse = function(e) {
       mx = e.pageX - offsetX;
       my = e.pageY - offsetY;
  }
- 
+
   // We return a simple javascript object (a hash) with x and y defined
   return {x: mx, y: my};
-}
+};
 
 
