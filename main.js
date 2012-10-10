@@ -4,11 +4,14 @@ init();
 animate();
 
 function init() {
-    var width = 640;
-    var height = 960;
+    var width = 480;//240;//640;
+    var height = 640;//320;//960;
 
-    width = (document.width < width) ? document.width : width;
-    height = (document.height < height) ? document.height : height;
+    var dw = window.innerWidth / window.devicePixelRatio;
+    var dh = window.innerHeight / window.devicePixelRatio;
+
+    width = (dw < width) ? dw : width;
+    height = (dh < height) ? dh : height;
 
 
     canvas = document.createElement( 'canvas' );
@@ -33,8 +36,8 @@ function init() {
     }
     canvas.addEventListener('click', addBullet, true);
     canvas.addEventListener('touchstart', addBullet, true);
-     //canvas.addEventListener('mousemove', move, true);
-     //canvas.addEventListener('touchmove', move, true);
+    canvas.addEventListener('mousemove', move, true);
+    canvas.addEventListener('touchmove', move, true);
 
 }
 

@@ -40,6 +40,7 @@ function Game(canvas, ctx, width, height){
 
          this.resetGameListener = this.resetGame.bind(this);
         this.canvas.addEventListener('click', this.resetGameListener, false);
+        this.canvas.addEventListener('touchstart', this.resetGameListener, false);
 }
 
 Game.prototype.resetGame = function() {
