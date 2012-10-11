@@ -390,14 +390,12 @@ Game.prototype.drawSplash = function(ctx){
         ctx.fillStyle = 'black';
         ctx.font = "bold 20pt Calibri";
         ctx.fillText("Click or tap to start!", 10, 100);
-        ctx.font = "13pt Calibri";
-        ctx.fillText("Tip: click or tap for instant fire", 10, 200);
+        
     }else{
         ctx.fillStyle = 'black';
         ctx.font = "bold 18pt Calibri";
         ctx.fillText("Click or start level: " + (this.currentLevel+1) , 10, 100);
-        ctx.font = "13pt Calibri";
-        ctx.fillText("Tip: click or tap for instant fire", 10, 200);
+        
     }
 };
 

@@ -34,8 +34,8 @@ function init() {
         e.preventDefault();
         game.e = e;
     }
-    canvas.addEventListener('click', addBullet, true);
-    canvas.addEventListener('touchstart', addBullet, true);
+//    canvas.addEventListener('click', addBullet, true);
+//    canvas.addEventListener('touchstart', addBullet, true);
     canvas.addEventListener('mousemove', move, true);
     canvas.addEventListener('touchmove', move, true);
 

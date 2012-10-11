@@ -45,14 +45,14 @@ Enemy.prototype.image.onload = function(){
 
         var j = 0;
         for(var i = 0; i < data.length; i += 4) {
-            console.log(data[i], data[i + 1], data[i + 2]);
+            //console.log(data[i], data[i + 1], data[i + 2]);
           // red
           var red = data[i];
-          red = 255 - red;
-          if(red < 220){
-            red = 220;
+          //red = 255 - red;
+          if(red>80){
+            red = 255;
           }
-          data[i] = 205;
+          data[i] = red;
           // green
           data[i + 1] = data[i + 1];
           // blue
