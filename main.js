@@ -1,4 +1,4 @@
-var canvas, context, game;
+var canvas, context, game, renderer, input;
 
 init();
 animate();
@@ -14,35 +14,30 @@ function init() {
     height = (dh < height) ? dh : height;
 
 
-    canvas = document.createElement( 'canvas' );
+//    canvas = document.createElement( 'canvas' );
+//
+//    canvas.width = width;
+//    canvas.height = height;
+//
+//    context = canvas.getContext( '2d' );
 
-    canvas.width = width;
-    canvas.height = height;
 
-    context = canvas.getContext( '2d' );
+    //game = new Game(canvas, context, width, height);
+    var gameWorker = new Worker('worker.js');
+    gameWorker.addEventListener('message', function(event) {
+        console.log("Called back by the worker!\n", event.data);
+        gameWorker.data = event.data;
+    }, false);
+     
+    gameWorker.postMessage({type: "setSize", width: width, height:height}); // start the worker.
 
-
-    game = new Game(canvas, context, width, height);
-    document.body.appendChild( canvas );
-    //listeners
-    function addBullet(e) {
-        e.preventDefault();
-        game.e = e;
-        game.addBullet = true;
-    }
-    function move(e) {
-        e.preventDefault();
-        game.e = e;
-    }
-//    canvas.addEventListener('click', addBullet, true);
-//    canvas.addEventListener('touchstart', addBullet, true);
-    canvas.addEventListener('mousemove', move, true);
-    canvas.addEventListener('touchmove', move, true);
+    renderer = new Renderer(gameWorker, width, height);
+    input = new Input(gameWorker, renderer);
 
 }
 
 function animate(dt) {
     window.requestAnimationFrame( animate );
-    game.frame(dt);
+    renderer.frame(dt);
 
 }

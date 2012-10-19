@@ -9,7 +9,7 @@ function Enemy(x, y, w, h, fill) {
   this.h = h || 1;
   this.live = true;
   this.opacity = 1;
-  this.speed = (Math.random() * 1.2) + 1;
+  this.speed = (Math.random()) + 0.5;
   this.toRemove = false;
   //this.image = new Image();
   //this.image.src = 'data:image/  png;base64,iVBORw0KGgoAAAANSUhEUgAAAB0AAAAQCAYAAADqDXTRAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3AkLCTIxwEb8QAAAAmBJREFUOMudlE1IVFEUx3+j06uwGcZx4lWKTPjRCANJECK4yaIx2rdwE1SMtXUR4iIkQVy1VikhhAJX7lJR2wjuaoSBKe3j+dCmIedpyjA61rwWcq9vxvdy9L963Ht+53/PPeddF0UKBlrN4jVtfcFFiSqFdxcDzbX3AFC99aS2vogtsxTjUnn50XSpw7xyISIBIQF+/jlF4seko/FxeFlpNvcbgBevJwH4/nWTy3U+ALrvd8h9J52IDwZazdmJFtPoD5iq32fefXrdVP0+0+gPmLMTLaZdr07KuwQQCffybuMB7Y+vAlDTUMXqchqAuaFFrpX3EtPHbYdK9PLD3wFH/k7lKFPxAbT1BVdZAbzTydzQIgAfp79JILjTWdAnO6ne+v/yVrnEKY2Mhr8iiJHR0M68KTiIvyIoE4vTWquMhHvlwDjxIn9MH983ffUyT9/gElW5ZxIUEoE9PVvcjtTQfmPrkOncey/TU6sMDnoRBVh5gLTynL6eRh4+KsOthHTGkk2sZN1UlRcGWrXaHGY0BUooDvMH60pIZzTVBs0+QHfkV7JuxpIelFDi4JfZW1ExVM0ROqlE1XsplYLpbWyrNrfjlTSoN+X9AzRdvCV7FdPHUUI6S/Nrh6a3sa3azH2qxfoaJZIzsgAjo7GcmsUT3mBpfm1/eq2JrP1IJGdQvfVycu0MresiVhgW5xNx8nqTm/EuYBjgtNsjA8+dest5j0I+nwaIAiM2vtF8PsbO7hN+befQ03VyY/fPtjV/wdsbdepJrf/sMIBuZLssy1bj6BGxxRpx2cFHyLbS47D/AIU9UjYGM5rlAAAAAElFTkSuQmCC';

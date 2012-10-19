@@ -10,7 +10,7 @@ function Bullet(x, y, w, dx, dy, fill) {
   this.w = w || 1;
   this.dx = dx || 0.5;
   this.dy = dy || 0.5;
-  this.speed = 10;
+  this.speed = 12;
   this.fill = fill || '#AAAAAA';
 }
 
