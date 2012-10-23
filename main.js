@@ -25,17 +25,16 @@ function init() {
     game = new Game(canvas, context, width, height);
     document.body.appendChild( canvas );
     //listeners
-    function addBullet(e) {
-        e.preventDefault();
-        game.e = e;
-        game.addBullet = true;
-    }
     function move(e) {
         e.preventDefault();
-        game.e = e;
+        if( e.targetTouches && e.targetTouches[0] ){
+            game.e.targetTouches = e.targetTouches;
+        }else{
+            game.e.pageX = e.pageX;
+            game.e.pageY = e.pageY;
+        }
     }
-//    canvas.addEventListener('click', addBullet, true);
-//    canvas.addEventListener('touchstart', addBullet, true);
+
     canvas.addEventListener('mousemove', move, true);
     canvas.addEventListener('touchmove', move, true);
 

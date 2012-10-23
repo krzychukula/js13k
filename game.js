@@ -1,14 +1,22 @@
 
 function Game(canvas, ctx, width, height){
     var that = this;
+    var i;
 
     this.canvas = canvas;
     this.ctx = ctx;
     this.width = width;
     this.height = height;
     this.mouse = {x: this.width/2, y: 0};
+    this.e = {}; //raw data from event
     this.bulletsPool = [];
+    for ( i = 0; i < 40; i++) {
+        this.bulletsPool.push(new Bullet(1, 1, 5, 1, 1, 'rgba(0, 0, 0, 1)'));
+    }
     this.enemiesPool = [];
+    for (i = 0; i < 40; i++) {
+        this.enemiesPool.push(new Enemy(1, 0, 26, 32, 'rgba(125, 50, 50, 1)'));
+    }
     this.bullets = [];
     this.enemies = [];
 
@@ -21,8 +29,6 @@ function Game(canvas, ctx, width, height){
     }];
     this.tower = new Tower(this.width/2, this.height, 10, 20, 'rgb(0,0,0)');
     this.viewfinder = new Viewfinder(0, 0, 20, 20, 'rgb(0,0,0)');
-    this.toClean = 0;
-    this.enemiesToClean = 0;
     this.addEnemy = 1;
     this.score = 0;
     this.lifes = 3;
@@ -111,13 +117,39 @@ Game.prototype.frame = function(date){
         return;
     }
 
-    this.draw(date);
+    this.update(date);
+    this.draw();
 };
 
-
-
-
 Game.prototype.draw = function(date){
+    var i = 0;
+    //enemies
+    var enemies = this.enemies;
+    var l = ( enemies && enemies.length) ? enemies.length : 0;
+    //Bullets
+    var bullets = this.bullets;
+    var bl = ( bullets && bullets.length) ? bullets.length : 0;
+    this.tile();
+
+    for (i = 0; i < l; i++) {
+        enemies[i].draw(this.ctx, i, date);
+    }
+
+
+    //draw bullets
+    for ( i = 0; i < bl; i++) {      
+        bullets[i].draw(this.ctx, i);
+    }
+
+    this.drawInfo(this.ctx);
+
+    // ** Add stuff you want drawn in the background all the time here **
+    this.tower.draw(this.ctx, this.mouse);
+    this.viewfinder.draw(this.ctx, this.mouse);
+}
+
+
+Game.prototype.update = function(date){
     //var that = this;
     var i, enemy;
 
@@ -230,15 +262,14 @@ Game.prototype.draw = function(date){
 
                         if(collision){
                             console.log('BUUM!!!!');
-                             enemies[i].kill();
-                             if(b){
+                            enemies[i].kill();
+                            if(b){
                                 this.bulletsPool.push(b);
-                             }
-                             bullets[j] = false;
-                             this.enemiesToClean++;
-                             this.toClean++;
-                             this.score++;
-                             break;
+                            }
+                            bullets.splice(j, 1);
+                            //j--;
+                            this.score++;
+                            break;
                         }
 
                     }
@@ -246,8 +277,6 @@ Game.prototype.draw = function(date){
             }
         }
     }
-
-    this.tile();
 
     for (i = 0; i < l; i++) {
       enemy = enemies[i];
@@ -262,24 +291,23 @@ Game.prototype.draw = function(date){
               if(enemy){
                   this.enemiesPool.push(enemy);
               }
-              enemies[i] = false;
-              this.enemiesToClean++;
+              enemies.splice(i, 1);
+              //i--;
               continue;
 
-        }else{
-            enemies[i].draw(this.ctx, i, date);
+        }else{            
             if(enemy.toRemove){
                 if(enemy){
                     this.enemiesPool.push(enemy);
                 }
-                enemies[i] = false;
-                this.enemiesToClean++;
+                enemies.splice(i, 1);
+                //i--;
             }
         }
 
     }
 
-
+    bl = ( bullets && bullets.length) ? bullets.length : 0;
     //draw bullets
     for ( i = 0; i < bl; i++) {
       var bullet = bullets[i];
@@ -290,32 +318,10 @@ Game.prototype.draw = function(date){
               if(bullet){
                 this.bulletsPool.push(bullet);
               }
-              bullets[i] = false;
-              this.toClean++;
-
-        }else{
-            bullets[i].draw(this.ctx, i);
+              bullets.splice(i, 1);
+              //i--;
 
         }
-    }
-
-    this.drawInfo(this.ctx);
-
-    // ** Add stuff you want drawn in the background all the time here **
-    this.tower.draw(this.ctx, this.mouse);
-    this.viewfinder.draw(this.ctx, this.mouse);
-
-    if(this.toClean > 2){
-        //console.log('clean', l);
-        this.bullets = bullets.filter(function(e){return e; });
-        //console.log('cleaned: ', this.bullets.length);
-        this.toClean = 0;
-    }
-    if(this.enemiesToClean > 0){
-        //console.log('enemies clean', l);
-        this.enemies = enemies.filter(function(e){return e; });
-        //console.log('enemies cleaned: ', this.enemies.length);
-        this.enemiesToClean = 0;
     }
 
 
