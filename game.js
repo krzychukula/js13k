@@ -64,7 +64,7 @@ Game.prototype.startFactories = function(){
 };
 
 Game.prototype.image = new Image();
-Game.prototype.image.src = 'data:image/  png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QAAAAAAAD5Q7t/AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3AkLDSMPVfdqJwAAAWRJREFUOMttk79rwlAQxz9B5UEEFwmCZigGMhQydyiEjkKhf1P/HbeOmfo3FC2CgpkMFDIIAVOC2nSwl96L3vbuvbv7/rjnHA5v9XZXkaU5k6lH4Btcd4BEWRZsdxWBb9juqiYvZ2exntf6UjeSQmkozbI0B2Ay9ei8PD+9njqGwDfsizOPD3eMhn2Ox4p9cebz44vvHxgN+/R6htGwz3hsOHUMWZrj1PV7LZ11BL4BuJnXlJzFel5naU4c+xY8gDj2AXDdAUmyas6SA+gKF4Ao9Kzp+uFsdm8hKcsCwKYgha47sAQTUdt3AI7YKNNvqa1RiivyxrIxS3MLqsDU6DSthkKSrJop7YUqy6IpWG5ya6Gi0Ls0WG7yK+v0Qz29bauzWM/rKPSsSRq+LrxlcTfwDf8ILsKIoHqaXl+txdVfaG+bjraFzSK14YH3d/Zaol2aRCEN5W4bnqgvumgK4pA4UJYFvxvMELAqKY7sAAAAAElFTkSuQmCC';
+Game.prototype.image.src = 'sheet_1.png';
 
 Game.prototype.clear = function(){
     this.ctx.fillStyle = 'rgb(245,245,245)';
@@ -118,7 +118,7 @@ Game.prototype.frame = function(date){
     }
 
     this.update(date);
-    this.draw();
+    this.draw(date);
 };
 
 Game.prototype.draw = function(date){
